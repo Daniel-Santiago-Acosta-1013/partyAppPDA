@@ -1,1 +1,17 @@
-/build
+# .gitignore
+
+# Gradle
+.gradle/
+build/
+
+# Local configuration files (IDE)
+.idea/
+*.iml
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Gradle Wrapper
+gradle/wrapper/gradle-wrapper.properties
+gradle/wrapper/gradle-wrapper.jar
