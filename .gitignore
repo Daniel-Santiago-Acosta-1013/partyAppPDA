@@ -13,3 +13,19 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Gradle
+.gradle/
+build/
+gradle/
+
+# Local configuration files (IDE)
+.idea/
+
+# OS generated files
+Thumbs.db
+
+# Gradle Wrapper
+gradle/wrapper/gradle-wrapper.properties
+gradle/wrapper/gradle-wrapper.jar
+
