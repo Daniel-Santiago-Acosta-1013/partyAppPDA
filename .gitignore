@@ -17,7 +17,6 @@ local.properties
 # Gradle
 .gradle/
 build/
-gradle/
 
 # Local configuration files (IDE)
 .idea/
