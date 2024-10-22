@@ -34,10 +34,10 @@ fun FeaturedEventCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .height(200.dp)
             .padding(bottom = 20.dp)
             .clickable(onClick = onClick)
             .clip(RoundedCornerShape(15.dp))
-            .background(Color(0xFF1c003e))
     ) {
         Image(
             painter = if (eventImage != null) {
@@ -47,8 +47,7 @@ fun FeaturedEventCard(
             },
             contentDescription = null,
             modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
+                .fillMaxSize()
                 .clip(RoundedCornerShape(15.dp)),
             contentScale = ContentScale.Crop
         )
@@ -80,6 +79,7 @@ fun FeaturedEventCard(
                 )
             }
 
+            // Content over the image
             Column {
                 Text(
                     text = eventDate,
