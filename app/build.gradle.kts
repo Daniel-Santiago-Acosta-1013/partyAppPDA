@@ -71,4 +71,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation("io.coil-kt:coil-compose:2.1.0")
     implementation("androidx.navigation:navigation-compose:2.6.0")
+
+    // Dependencias añadidas para CameraX y ML Kit
+    implementation("androidx.camera:camera-camera2:1.1.0")
+    implementation("androidx.camera:camera-lifecycle:1.1.0")
+    implementation("androidx.camera:camera-view:1.1.0")
+    implementation("androidx.camera:camera-extensions:1.1.0")
+    implementation("com.google.mlkit:barcode-scanning:17.0.2")
 }

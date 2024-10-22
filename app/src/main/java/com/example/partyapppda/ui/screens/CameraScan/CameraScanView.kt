@@ -1,33 +1,229 @@
 package com.example.partyapppda.ui.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.util.Size
+import androidx.camera.core.*
+import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.example.partyapppda.ui.components.BottomNavBar
+import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.common.InputImage
+import kotlinx.coroutines.launch
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 @Composable
 fun CameraScanView(navController: NavController) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    var hasCameraPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    var showPermissionDialog by remember { mutableStateOf(false) }
+    var scannedData by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
+
+    if (!hasCameraPermission) {
+        LaunchedEffect(Unit) {
+            showPermissionDialog = true
+        }
+    }
+
     Scaffold(
         bottomBar = { BottomNavBar(navController) },
         modifier = Modifier.background(Color(0xFF1c003e))
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .padding(20.dp)
         ) {
-            // Your camera scanning UI goes here
-            Text(
-                text = "Camera Scan View",
-                color = Color.White,
-                style = MaterialTheme.typography.headlineMedium
-            )
+            if (hasCameraPermission) {
+                CameraPreview(
+                    onBarcodeScanned = { barcode ->
+                        scannedData = barcode
+                    }
+                )
+            } else {
+                Text(
+                    text = "Se requiere permiso de cámara para escanear códigos QR.",
+                    color = Color.White,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+
+            if (scannedData != null) {
+                AlertDialog(
+                    onDismissRequest = {
+                        scannedData = null
+                    },
+                    title = {
+                        Text(text = "Código QR Escaneado")
+                    },
+                    text = {
+                        Text(text = scannedData ?: "")
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                scannedData = null
+                            }
+                        ) {
+                            Text("Aceptar")
+                        }
+                    }
+                )
+            }
+
+            if (showPermissionDialog) {
+                AlertDialog(
+                    onDismissRequest = {
+                        showPermissionDialog = false
+                    },
+                    title = {
+                        Text(text = "Permiso de Cámara")
+                    },
+                    text = {
+                        Text(text = "La aplicación necesita acceso a la cámara para escanear códigos QR.")
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                showPermissionDialog = false
+                                coroutineScope.launch {
+                                    val result = requestCameraPermission(context)
+                                    hasCameraPermission = result
+                                }
+                            }
+                        ) {
+                            Text("Permitir")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                showPermissionDialog = false
+                            }
+                        ) {
+                            Text("Cancelar")
+                        }
+                    }
+                )
+            }
         }
     }
+}
+
+@Composable
+fun CameraPreview(
+    onBarcodeScanned: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
+    val previewView = remember { androidx.camera.view.PreviewView(context) }
+
+    val scanner = remember { BarcodeScanning.getClient() }
+
+    var executor: ExecutorService? = remember { Executors.newSingleThreadExecutor() }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            executor?.shutdown()
+            executor = null
+        }
+    }
+
+    LaunchedEffect(cameraProviderFuture) {
+        val cameraProvider = cameraProviderFuture.get()
+        val preview = Preview.Builder()
+            .build()
+            .also {
+                it.setSurfaceProvider(previewView.surfaceProvider)
+            }
+
+        val imageAnalysis = ImageAnalysis.Builder()
+            .setTargetResolution(Size(1280, 720))
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .build()
+
+        imageAnalysis.setAnalyzer(executor!!, { imageProxy ->
+            processImageProxy(scanner, imageProxy, onBarcodeScanned)
+        })
+
+        val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
+        try {
+            cameraProvider.unbindAll()
+            cameraProvider.bindToLifecycle(
+                lifecycleOwner,
+                cameraSelector,
+                preview,
+                imageAnalysis
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    AndroidView(
+        factory = { previewView },
+        modifier = Modifier.fillMaxSize()
+    )
+}
+
+fun processImageProxy(
+    scanner: com.google.mlkit.vision.barcode.BarcodeScanner,
+    imageProxy: ImageProxy,
+    onBarcodeScanned: (String) -> Unit
+) {
+    val mediaImage = imageProxy.image
+    if (mediaImage != null) {
+        val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+        scanner.process(image)
+            .addOnSuccessListener { barcodes ->
+                if (barcodes.isNotEmpty()) {
+                    val barcode = barcodes[0]
+                    val rawValue = barcode.rawValue
+                    if (rawValue != null) {
+                        onBarcodeScanned(rawValue)
+                    }
+                }
+            }
+            .addOnFailureListener {
+                // Manejar errores si es necesario
+            }
+            .addOnCompleteListener {
+                imageProxy.close()
+            }
+    } else {
+        imageProxy.close()
+    }
+}
+
+suspend fun requestCameraPermission(context: android.content.Context): Boolean {
+    // Implementa la solicitud de permiso de cámara aquí
+    // Por simplicidad, devolvemos false en este ejemplo
+    return false
 }
