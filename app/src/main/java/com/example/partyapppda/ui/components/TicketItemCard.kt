@@ -49,7 +49,7 @@ fun TicketItemCard(
                 Text(
                     text = "Ver detalle",
                     fontSize = 14.sp,
-                    color = Color(0xFF1C0A36)
+                    color = Color(0xFFB3B3B3)
                 )
             }
             Column(
