@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -21,10 +22,13 @@ import androidx.navigation.NavController
 import com.example.partyapppda.ui.components.BottomNavBar
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
-import kotlinx.coroutines.launch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 
+@OptIn(androidx.camera.core.ExperimentalGetImage::class)
 @Composable
 fun CameraScanView(navController: NavController) {
     val context = LocalContext.current
@@ -39,13 +43,19 @@ fun CameraScanView(navController: NavController) {
         )
     }
 
-    var showPermissionDialog by remember { mutableStateOf(false) }
-    var scannedData by remember { mutableStateOf<String?>(null) }
+    var scannedData by rememberSaveable { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { granted ->
+            hasCameraPermission = granted
+        }
+    )
 
     if (!hasCameraPermission) {
         LaunchedEffect(Unit) {
-            showPermissionDialog = true
+            launcher.launch(Manifest.permission.CAMERA)
         }
     }
 
@@ -94,46 +104,11 @@ fun CameraScanView(navController: NavController) {
                     }
                 )
             }
-
-            if (showPermissionDialog) {
-                AlertDialog(
-                    onDismissRequest = {
-                        showPermissionDialog = false
-                    },
-                    title = {
-                        Text(text = "Permiso de Cámara")
-                    },
-                    text = {
-                        Text(text = "La aplicación necesita acceso a la cámara para escanear códigos QR.")
-                    },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                showPermissionDialog = false
-                                coroutineScope.launch {
-                                    val result = requestCameraPermission(context)
-                                    hasCameraPermission = result
-                                }
-                            }
-                        ) {
-                            Text("Permitir")
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(
-                            onClick = {
-                                showPermissionDialog = false
-                            }
-                        ) {
-                            Text("Cancelar")
-                        }
-                    }
-                )
-            }
         }
     }
 }
 
+@OptIn(androidx.camera.core.ExperimentalGetImage::class)
 @Composable
 fun CameraPreview(
     onBarcodeScanned: (String) -> Unit
@@ -193,6 +168,7 @@ fun CameraPreview(
     )
 }
 
+@androidx.camera.core.ExperimentalGetImage
 fun processImageProxy(
     scanner: com.google.mlkit.vision.barcode.BarcodeScanner,
     imageProxy: ImageProxy,
@@ -220,10 +196,4 @@ fun processImageProxy(
     } else {
         imageProxy.close()
     }
-}
-
-suspend fun requestCameraPermission(context: android.content.Context): Boolean {
-    // Implementa la solicitud de permiso de cámara aquí
-    // Por simplicidad, devolvemos false en este ejemplo
-    return false
 }
