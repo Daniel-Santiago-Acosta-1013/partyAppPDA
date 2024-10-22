@@ -15,10 +15,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
 import com.example.partyapppda.ui.components.TicketItemCard
 import androidx.compose.ui.draw.clip
+import com.example.partyapppda.ui.components.BottomNavBar
 
 @Composable
 fun readEventTiketScreen(navController: NavController, eventId: Int) {
-    Scaffold { innerPadding ->
+    Scaffold(
+        bottomBar = { BottomNavBar(navController) }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
