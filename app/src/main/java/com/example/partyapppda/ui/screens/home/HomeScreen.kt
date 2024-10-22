@@ -15,8 +15,8 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun HomeScreen() {
@@ -48,7 +48,7 @@ fun HomeScreen() {
                     }
                     .padding(bottom = 10.dp)
             )
-            // Sample events
+            // Eventos de ejemplo
             val events = listOf(
                 EventItem(
                     id = 1,
@@ -86,17 +86,17 @@ fun HomeScreen() {
 
 // Funciones auxiliares para formatear fecha y hora
 fun formatTime(dateTime: String): String {
-    val formatter = DateTimeFormatter.ISO_DATE_TIME
-    val dateTimeParsed = LocalDateTime.parse(dateTime, formatter)
-    val timeFormatter = DateTimeFormatter.ofPattern("hh:mm a")
-    return dateTimeParsed.format(timeFormatter)
+    val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+    val outputFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
+    val date = inputFormat.parse(dateTime)
+    return outputFormat.format(date)
 }
 
 fun formatDate(dateTime: String): String {
-    val formatter = DateTimeFormatter.ISO_DATE_TIME
-    val dateTimeParsed = LocalDateTime.parse(dateTime, formatter)
-    val dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy")
-    return dateTimeParsed.format(dateFormatter)
+    val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+    val outputFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+    val date = inputFormat.parse(dateTime)
+    return outputFormat.format(date)
 }
 
 // Definición de la clase de datos EventItem
