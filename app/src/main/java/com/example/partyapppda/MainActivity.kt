@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import com.example.partyapppda.ui.theme.PartyAppPDATheme
 import com.example.partyapppda.ui.screens.login.LoginScreen
 import com.example.partyapppda.ui.screens.home.HomeScreen
+import androidx.navigation.compose.rememberNavController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,9 +16,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PartyAppPDATheme {
+                val navController = rememberNavController()
                 var isLoggedIn by remember { mutableStateOf(false) }
                 if (isLoggedIn) {
-                    HomeScreen()
+                    HomeScreen(navController = navController)
                 } else {
                     LoginScreen(onLoginSuccess = { isLoggedIn = true })
                 }

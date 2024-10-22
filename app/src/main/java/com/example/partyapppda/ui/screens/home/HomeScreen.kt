@@ -17,9 +17,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import java.text.SimpleDateFormat
 import java.util.Locale
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavController) {
     Scaffold { innerPadding ->
         Column(
             modifier = Modifier
@@ -76,7 +78,9 @@ fun HomeScreen() {
                         eventDate = formatDate(event.event_start_date),
                         eventTitle = event.name,
                         eventSubtitle = event.description,
-                        onClick = { /* Manejar clic */ }
+                        onClick = {
+                            navController.navigate("readEventTiketScreen/${event.id}")
+                        }
                     )
                 }
             }
@@ -113,6 +117,7 @@ data class EventItem(
 @Composable
 fun HomeScreenPreview() {
     PartyAppPDATheme {
-        HomeScreen()
+        val navController = rememberNavController()
+        HomeScreen(navController)
     }
 }
