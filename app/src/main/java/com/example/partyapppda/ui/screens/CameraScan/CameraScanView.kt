@@ -28,7 +28,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 
-@OptIn(androidx.camera.core.ExperimentalGetImage::class)
 @Composable
 fun CameraScanView(navController: NavController) {
     val context = LocalContext.current
@@ -108,7 +107,6 @@ fun CameraScanView(navController: NavController) {
     }
 }
 
-@OptIn(androidx.camera.core.ExperimentalGetImage::class)
 @Composable
 fun CameraPreview(
     onBarcodeScanned: (String) -> Unit
@@ -143,9 +141,8 @@ fun CameraPreview(
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .build()
 
-        imageAnalysis.setAnalyzer(executor!!, { imageProxy ->
-            processImageProxy(scanner, imageProxy, onBarcodeScanned)
-        })
+        // Definir el analizador como una clase separada
+        imageAnalysis.setAnalyzer(executor!!, BarcodeAnalyzer(scanner, onBarcodeScanned))
 
         val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
@@ -168,32 +165,35 @@ fun CameraPreview(
     )
 }
 
-@androidx.camera.core.ExperimentalGetImage
-fun processImageProxy(
-    scanner: com.google.mlkit.vision.barcode.BarcodeScanner,
-    imageProxy: ImageProxy,
-    onBarcodeScanned: (String) -> Unit
-) {
-    val mediaImage = imageProxy.image
-    if (mediaImage != null) {
-        val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-        scanner.process(image)
-            .addOnSuccessListener { barcodes ->
-                if (barcodes.isNotEmpty()) {
-                    val barcode = barcodes[0]
-                    val rawValue = barcode.rawValue
-                    if (rawValue != null) {
-                        onBarcodeScanned(rawValue)
+// Definir el analizador en una clase separada y anotar el método analyze
+private class BarcodeAnalyzer(
+    private val scanner: com.google.mlkit.vision.barcode.BarcodeScanner,
+    private val onBarcodeScanned: (String) -> Unit
+) : ImageAnalysis.Analyzer {
+
+    @androidx.camera.core.ExperimentalGetImage
+    override fun analyze(imageProxy: ImageProxy) {
+        val mediaImage = imageProxy.image
+        if (mediaImage != null) {
+            val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+            scanner.process(image)
+                .addOnSuccessListener { barcodes ->
+                    if (barcodes.isNotEmpty()) {
+                        val barcode = barcodes[0]
+                        val rawValue = barcode.rawValue
+                        if (rawValue != null) {
+                            onBarcodeScanned(rawValue)
+                        }
                     }
                 }
-            }
-            .addOnFailureListener {
-                // Manejar errores si es necesario
-            }
-            .addOnCompleteListener {
-                imageProxy.close()
-            }
-    } else {
-        imageProxy.close()
+                .addOnFailureListener {
+                    // Manejar errores si es necesario
+                }
+                .addOnCompleteListener {
+                    imageProxy.close()
+                }
+        } else {
+            imageProxy.close()
+        }
     }
 }
