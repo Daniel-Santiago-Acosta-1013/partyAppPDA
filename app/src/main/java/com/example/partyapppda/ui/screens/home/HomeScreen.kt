@@ -11,8 +11,8 @@ import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import java.time.LocalDateTime
@@ -33,15 +33,21 @@ fun HomeScreen() {
                 text = "selecciona evento",
                 color = Color.White,
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.W300,
                 modifier = Modifier
                     .padding(vertical = 20.dp)
-                    .border(
-                        BorderStroke(2.dp, Color(0xFFFF0080)),
-                    )
+                    .drawBehind {
+                        val strokeWidth = 2.dp.toPx()
+                        val y = size.height - strokeWidth / 2
+                        drawLine(
+                            color = Color(0xFFFF0080),
+                            start = Offset(0f, y),
+                            end = Offset(size.width, y),
+                            strokeWidth = strokeWidth
+                        )
+                    }
                     .padding(bottom = 10.dp)
             )
-
             // Sample events
             val events = listOf(
                 EventItem(
