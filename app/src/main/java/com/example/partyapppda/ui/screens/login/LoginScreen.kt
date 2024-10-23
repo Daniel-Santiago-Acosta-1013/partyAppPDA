@@ -2,8 +2,9 @@ package com.example.partyapppda.ui.screens.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,17 +21,18 @@ import com.example.partyapppda.ui.components.Loader
 import com.example.partyapppda.ui.components.MessageComponent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.saveable.rememberSaveable
 
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var showMessage by remember { mutableStateOf(false) }
-    var messageState by remember { mutableStateOf("info") }
-    var messageText by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
-    var showResetPasswordModal by remember { mutableStateOf(false) }
-    var resetUsernameOrEmail by remember { mutableStateOf("") }
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    var showMessage by rememberSaveable { mutableStateOf(false) }
+    var messageState by rememberSaveable { mutableStateOf("info") }
+    var messageText by rememberSaveable { mutableStateOf("") }
+    var isLoading by rememberSaveable { mutableStateOf(false) }
+    var showResetPasswordModal by rememberSaveable { mutableStateOf(false) }
+    var resetUsernameOrEmail by rememberSaveable { mutableStateOf("") }
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -42,10 +44,13 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 .fillMaxSize()
                 .background(Color(0xFF100126))
         ) {
+            // Agregar scroll vertical
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .align(Alignment.Center)
+                    .verticalScroll(rememberScrollState())
+                    .align(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Header with logo
                 Image(
@@ -60,7 +65,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
+                        .fillMaxHeight()
                         .background(
                             color = Color(0xFF1C0A36),
                             shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp)
@@ -71,7 +76,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                     Text(
                         text = "Inicia sesión",
                         color = Color.White,
-                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                        style = MaterialTheme.typography.headlineMedium,
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
                             .padding(top = 20.dp),
@@ -123,8 +128,9 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                             }
                         },
                         modifier = Modifier
-                            .padding(top = 100.dp)
+                            .padding(top = 100.dp, bottom = 100.dp)
                             .height(66.dp)
+                            .fillMaxWidth()
                     )
                 }
             }
