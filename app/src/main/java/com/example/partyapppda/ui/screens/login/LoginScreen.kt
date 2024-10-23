@@ -128,7 +128,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                             }
                         },
                         modifier = Modifier
-                            .padding(top = 100.dp, bottom = 100.dp)
+                            .padding(top = 50.dp, bottom = 150.dp)
                             .height(66.dp)
                             .fillMaxWidth()
                     )

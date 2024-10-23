@@ -27,9 +27,9 @@ fun BottomNavBar(navController: NavController) {
         color = Color.Transparent,
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp)
+            .height(130.dp)
             .padding(horizontal = 1.dp, vertical = 8.dp)
-            .padding(bottom = 35.dp)
+            .padding(bottom = 45.dp)
     ) {
         Box(
             modifier = Modifier
