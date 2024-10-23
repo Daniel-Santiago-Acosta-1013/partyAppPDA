@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.os.VibratorManager
 import android.util.Size
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -14,14 +15,14 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
@@ -33,8 +34,6 @@ import java.util.concurrent.Executors
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.dp
 
 @Composable
 fun CameraScanView(navController: NavController) {
@@ -176,8 +175,8 @@ fun CameraPreview(
         Box(
             modifier = Modifier
                 .size(300.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .border(4.dp, Color(0xFFD90F96), RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(60.dp))
+                .border(4.dp, Color(0xFFD90F96), RoundedCornerShape(60.dp))
         ) {
             AndroidView(
                 factory = { previewView },
@@ -208,12 +207,21 @@ private class BarcodeAnalyzer(
                             onBarcodeScanned(rawValue)
 
                             // Hacer vibrar el dispositivo brevemente al leer el QR
-                            val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
+                            val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                                vibratorManager.defaultVibrator
                             } else {
                                 @Suppress("DEPRECATION")
-                                vibrator.vibrate(100)
+                                context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                            }
+
+                            if (ContextCompat.checkSelfPermission(context, Manifest.permission.VIBRATE) == PackageManager.PERMISSION_GRANTED) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                    vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
+                                } else {
+                                    @Suppress("DEPRECATION")
+                                    vibrator.vibrate(100)
+                                }
                             }
                         }
                     }
