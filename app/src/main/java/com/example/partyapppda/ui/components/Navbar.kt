@@ -40,7 +40,7 @@ fun BottomNavBar(navController: NavController) {
                     ),
                     shape = RoundedCornerShape(30.dp)
                 )
-                .padding(top = 26.dp)
+                .padding(top = 10.dp)
         ) {
             Row(
                 modifier = Modifier
@@ -54,6 +54,7 @@ fun BottomNavBar(navController: NavController) {
                     Box(
                         modifier = Modifier
                             .weight(1f)
+                            .height(50.dp)
                             .clickable {
                                 navController.navigate(item.route) {
                                     navController.graph.startDestinationRoute?.let { route ->
@@ -67,29 +68,35 @@ fun BottomNavBar(navController: NavController) {
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        if (selected) {
-                            // Ícono seleccionado dentro de un círculo blanco, color negro
-                            Box(
-                                modifier = Modifier
-                                    .size(50.dp)
-                                    .background(Color.White, shape = CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
+                        // Añadido: Envolver ambos casos en un Box de tamaño fijo
+                        Box(
+                            modifier = Modifier.size(50.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (selected) {
+                                // Ícono seleccionado dentro de un círculo blanco
+                                Box(
+                                    modifier = Modifier
+                                        .size(50.dp)
+                                        .background(Color.White, shape = CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = item.icon,
+                                        contentDescription = item.title,
+                                        tint = Color.Black,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                            } else {
+                                // Ícono no seleccionado
                                 Icon(
                                     imageVector = item.icon,
                                     contentDescription = item.title,
-                                    tint = Color.Black,
+                                    tint = Color.White,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
-                        } else {
-                            // Ícono no seleccionado, color blanco y sin círculo
-                            Icon(
-                                imageVector = item.icon,
-                                contentDescription = item.title,
-                                tint = Color.White,
-                                modifier = Modifier.size(24.dp)
-                            )
                         }
                     }
                 }
