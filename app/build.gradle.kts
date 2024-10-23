@@ -78,4 +78,6 @@ dependencies {
     implementation("androidx.camera:camera-view:1.1.0")
     implementation("androidx.camera:camera-extensions:1.1.0")
     implementation("com.google.mlkit:barcode-scanning:17.0.2")
+
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar"))))
 }
