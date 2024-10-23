@@ -1,6 +1,7 @@
 package com.example.partyapppda.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,61 +42,56 @@ fun BottomNavBar(navController: NavController) {
                 )
                 .padding(top = 26.dp)
         ) {
-            NavigationBar(
-                containerColor = Color.Transparent,
-                modifier = Modifier.fillMaxSize()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 items.forEach { item ->
                     val selected = currentRoute == item.route
-                    NavigationBarItem(
-                        selected = selected,
-                        onClick = {
-                            navController.navigate(item.route) {
-                                navController.graph.startDestinationRoute?.let { route ->
-                                    popUpTo(route) {
-                                        saveState = true
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable {
+                                navController.navigate(item.route) {
+                                    navController.graph.startDestinationRoute?.let { route ->
+                                        popUpTo(route) {
+                                            saveState = true
+                                        }
                                     }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = {
-                            if (selected) {
-                                // Icono seleccionado dentro de un círculo blanco, color negro
-                                Box(
-                                    modifier = Modifier
-                                        .size(50.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(80.dp)
-                                            .background(Color.White, shape = CircleShape),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = item.icon,
-                                            contentDescription = item.title,
-                                            tint = Color.Black,
-                                            modifier = Modifier.size(55.dp)
-                                        )
-                                    }
-                                }
-                            } else {
-                                // Icono no seleccionado, color blanco y sin círculo
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (selected) {
+                            // Ícono seleccionado dentro de un círculo blanco, color negro
+                            Box(
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .background(Color.White, shape = CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
                                 Icon(
                                     imageVector = item.icon,
                                     contentDescription = item.title,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(55.dp)
+                                    tint = Color.Black,
+                                    modifier = Modifier.size(24.dp)
                                 )
                             }
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = Color.Transparent
-                        )
-                    )
+                        } else {
+                            // Ícono no seleccionado, color blanco y sin círculo
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.title,
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
                 }
             }
         }
