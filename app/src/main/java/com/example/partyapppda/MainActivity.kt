@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            PartyAppPDATheme {
+            PartyAppPDATheme(dynamicColor = false) { // Desactivamos colores dinámicos
                 val navController = rememberNavController()
                 var isLoggedIn by remember { mutableStateOf(false) }
 
