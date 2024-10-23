@@ -8,6 +8,9 @@
     <!-- Declaración de la característica de hardware de la cámara -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
+    <!-- Agregar permiso para vibración -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"

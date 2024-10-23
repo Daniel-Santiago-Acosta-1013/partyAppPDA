@@ -1,12 +1,18 @@
 package com.example.partyapppda.ui.screens
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Size
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -27,6 +33,8 @@ import java.util.concurrent.Executors
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun CameraScanView(navController: NavController) {
@@ -65,7 +73,8 @@ fun CameraScanView(navController: NavController) {
         Box(
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxSize()
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
             if (hasCameraPermission) {
                 CameraPreview(
@@ -142,7 +151,7 @@ fun CameraPreview(
             .build()
 
         // Definir el analizador como una clase separada
-        imageAnalysis.setAnalyzer(executor!!, BarcodeAnalyzer(scanner, onBarcodeScanned))
+        imageAnalysis.setAnalyzer(executor!!, BarcodeAnalyzer(context, scanner, onBarcodeScanned))
 
         val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
@@ -159,14 +168,28 @@ fun CameraPreview(
         }
     }
 
-    AndroidView(
-        factory = { previewView },
-        modifier = Modifier.fillMaxSize()
-    )
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        // Cuadrado centrado con bordes redondeados y borde de color #D90F96
+        Box(
+            modifier = Modifier
+                .size(300.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .border(4.dp, Color(0xFFD90F96), RoundedCornerShape(20.dp))
+        ) {
+            AndroidView(
+                factory = { previewView },
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
 }
 
 // Definir el analizador en una clase separada y anotar el método analyze
 private class BarcodeAnalyzer(
+    private val context: Context,
     private val scanner: com.google.mlkit.vision.barcode.BarcodeScanner,
     private val onBarcodeScanned: (String) -> Unit
 ) : ImageAnalysis.Analyzer {
@@ -183,6 +206,15 @@ private class BarcodeAnalyzer(
                         val rawValue = barcode.rawValue
                         if (rawValue != null) {
                             onBarcodeScanned(rawValue)
+
+                            // Hacer vibrar el dispositivo brevemente al leer el QR
+                            val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
+                            } else {
+                                @Suppress("DEPRECATION")
+                                vibrator.vibrate(100)
+                            }
                         }
                     }
                 }
