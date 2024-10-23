@@ -26,8 +26,9 @@ fun BottomNavBar(navController: NavController) {
         color = Color.Transparent,
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .height(120.dp)
+            .padding(horizontal = 1.dp, vertical = 8.dp)
+            .padding(bottom = 35.dp)
     ) {
         Box(
             modifier = Modifier
@@ -38,6 +39,7 @@ fun BottomNavBar(navController: NavController) {
                     ),
                     shape = RoundedCornerShape(30.dp)
                 )
+                .padding(top = 26.dp)
         ) {
             NavigationBar(
                 containerColor = Color.Transparent,
@@ -68,7 +70,7 @@ fun BottomNavBar(navController: NavController) {
                                 ) {
                                     Box(
                                         modifier = Modifier
-                                            .size(40.dp)
+                                            .size(80.dp)
                                             .background(Color.White, shape = CircleShape),
                                         contentAlignment = Alignment.Center
                                     ) {
@@ -76,7 +78,7 @@ fun BottomNavBar(navController: NavController) {
                                             imageVector = item.icon,
                                             contentDescription = item.title,
                                             tint = Color.Black,
-                                            modifier = Modifier.size(24.dp)
+                                            modifier = Modifier.size(55.dp)
                                         )
                                     }
                                 }
@@ -86,7 +88,7 @@ fun BottomNavBar(navController: NavController) {
                                     imageVector = item.icon,
                                     contentDescription = item.title,
                                     tint = Color.White,
-                                    modifier = Modifier.size(30.dp)
+                                    modifier = Modifier.size(55.dp)
                                 )
                             }
                         },
