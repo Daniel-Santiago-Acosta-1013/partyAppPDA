@@ -2,8 +2,11 @@ package com.example.partyapppda.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.unit.dp
@@ -17,35 +20,33 @@ fun BottomNavBar(navController: NavController) {
         BottomNavItem.ScansList
     )
 
+    val currentRoute = navController.currentDestination?.route
+
     Surface(
         color = Color.Transparent,
         modifier = Modifier
             .fillMaxWidth()
-            .height(60.dp)
+            .height(80.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .background(
                     brush = Brush.horizontalGradient(
                         colors = listOf(Color(0xFFD90F96), Color(0xFF5503AE))
-                    )
+                    ),
+                    shape = RoundedCornerShape(30.dp)
                 )
         ) {
             NavigationBar(
                 containerColor = Color.Transparent,
                 modifier = Modifier.fillMaxSize()
             ) {
-                val currentRoute = navController.currentDestination?.route
                 items.forEach { item ->
+                    val selected = currentRoute == item.route
                     NavigationBarItem(
-                        icon = {
-                            Icon(
-                                imageVector = item.icon,
-                                contentDescription = item.title
-                            )
-                        },
-                        selected = currentRoute == item.route,
+                        selected = selected,
                         onClick = {
                             navController.navigate(item.route) {
                                 navController.graph.startDestinationRoute?.let { route ->
@@ -57,9 +58,39 @@ fun BottomNavBar(navController: NavController) {
                                 restoreState = true
                             }
                         },
+                        icon = {
+                            if (selected) {
+                                // Icono seleccionado dentro de un círculo blanco, color negro
+                                Box(
+                                    modifier = Modifier
+                                        .size(50.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .background(Color.White, shape = CircleShape),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = item.icon,
+                                            contentDescription = item.title,
+                                            tint = Color.Black,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                }
+                            } else {
+                                // Icono no seleccionado, color blanco y sin círculo
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = item.title,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            }
+                        },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color(0xFFff0080),
-                            unselectedIconColor = Color.Gray,
                             indicatorColor = Color.Transparent
                         )
                     )
