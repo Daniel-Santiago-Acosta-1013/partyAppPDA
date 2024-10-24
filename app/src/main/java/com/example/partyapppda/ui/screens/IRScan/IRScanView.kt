@@ -182,7 +182,7 @@ fun IRScanView(navController: NavController) {
 @Composable
 fun BreathingCircles(isScanning: Boolean) {
     if (isScanning) {
-        val infiniteTransition = rememberInfiniteTransition()
+        val infiniteTransition = rememberInfiniteTransition(label = "BreathingTransition")
 
         val scale1 by infiniteTransition.animateFloat(
             initialValue = 1f,
@@ -190,7 +190,8 @@ fun BreathingCircles(isScanning: Boolean) {
             animationSpec = infiniteRepeatable(
                 animation = tween(durationMillis = 3000, easing = LinearEasing),
                 repeatMode = RepeatMode.Restart
-            )
+            ),
+            label = "Scale1"
         )
 
         val alpha1 by infiniteTransition.animateFloat(
@@ -199,7 +200,8 @@ fun BreathingCircles(isScanning: Boolean) {
             animationSpec = infiniteRepeatable(
                 animation = tween(durationMillis = 3000, easing = LinearEasing),
                 repeatMode = RepeatMode.Restart
-            )
+            ),
+            label = "Alpha1"
         )
 
         val scale2 by infiniteTransition.animateFloat(
@@ -209,7 +211,8 @@ fun BreathingCircles(isScanning: Boolean) {
                 animation = tween(durationMillis = 4000, easing = LinearEasing),
                 repeatMode = RepeatMode.Restart,
                 initialStartOffset = StartOffset(1000)
-            )
+            ),
+            label = "Scale2"
         )
 
         val alpha2 by infiniteTransition.animateFloat(
@@ -219,7 +222,8 @@ fun BreathingCircles(isScanning: Boolean) {
                 animation = tween(durationMillis = 4000, easing = LinearEasing),
                 repeatMode = RepeatMode.Restart,
                 initialStartOffset = StartOffset(1000)
-            )
+            ),
+            label = "Alpha2"
         )
 
         val scale3 by infiniteTransition.animateFloat(
@@ -229,7 +233,8 @@ fun BreathingCircles(isScanning: Boolean) {
                 animation = tween(durationMillis = 5000, easing = LinearEasing),
                 repeatMode = RepeatMode.Restart,
                 initialStartOffset = StartOffset(2000)
-            )
+            ),
+            label = "Scale3"
         )
 
         val alpha3 by infiniteTransition.animateFloat(
@@ -239,7 +244,8 @@ fun BreathingCircles(isScanning: Boolean) {
                 animation = tween(durationMillis = 5000, easing = LinearEasing),
                 repeatMode = RepeatMode.Restart,
                 initialStartOffset = StartOffset(2000)
-            )
+            ),
+            label = "Alpha3"
         )
 
         Box(
