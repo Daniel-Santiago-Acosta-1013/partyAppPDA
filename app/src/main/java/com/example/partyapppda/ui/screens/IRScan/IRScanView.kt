@@ -1,21 +1,31 @@
 package com.example.partyapppda.ui.screens
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.partyapppda.ui.components.BottomNavBar
+import com.airbnb.lottie.compose.*
 import com.rscja.barcode.BarcodeDecoder
 import com.rscja.barcode.BarcodeFactory
 import com.rscja.deviceapi.entity.BarcodeEntity
 import android.app.Activity
 import android.util.Log
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.draw.clip
+import com.example.partyapppda.R
 
 @Composable
 fun IRScanView(navController: NavController) {
@@ -25,6 +35,7 @@ fun IRScanView(navController: NavController) {
     var scannedData by rememberSaveable { mutableStateOf<String?>(null) }
     var barcodeDecoder by remember { mutableStateOf<BarcodeDecoder?>(null) }
     var isDecoderInitialized by remember { mutableStateOf(false) }
+    var isScanning by remember { mutableStateOf(false) }
 
     // Inicializar el decodificador de códigos de barras
     LaunchedEffect(activity) {
@@ -38,8 +49,10 @@ fun IRScanView(navController: NavController) {
                     override fun onDecodeComplete(barcodeEntity: BarcodeEntity) {
                         if (barcodeEntity.resultCode == BarcodeDecoder.DECODE_SUCCESS) {
                             scannedData = barcodeEntity.barcodeData
+                            isScanning = false
                         } else {
                             scannedData = "Error al decodificar"
+                            isScanning = false
                         }
                     }
                 })
@@ -55,6 +68,7 @@ fun IRScanView(navController: NavController) {
     // Cerrar el decodificador al salir de la pantalla
     DisposableEffect(Unit) {
         onDispose {
+            barcodeDecoder?.stopScan()
             barcodeDecoder?.close()
         }
     }
@@ -63,54 +77,108 @@ fun IRScanView(navController: NavController) {
         bottomBar = { BottomNavBar(navController) },
         modifier = Modifier.background(Color(0xFF1c003e))
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .padding(20.dp)
+                .background(Color(0xFF1c003e)),
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "IR Scan View",
-                color = Color.White,
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = { barcodeDecoder?.startScan() },
-                enabled = isDecoderInitialized
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Text(text = "Iniciar Escaneo")
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(
-                onClick = { barcodeDecoder?.stopScan() },
-                enabled = isDecoderInitialized
-            ) {
-                Text(text = "Detener Escaneo")
-            }
-        }
+                // Lottie animation
+                val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.pda_animation))
+                val animationState = animateLottieCompositionAsState(
+                    composition = composition,
+                    isPlaying = isScanning,
+                    iterations = LottieConstants.IterateForever
+                )
 
-        if (scannedData != null) {
-            AlertDialog(
-                onDismissRequest = {
-                    scannedData = null
-                },
-                title = {
-                    Text(text = "Datos Escaneados")
-                },
-                text = {
-                    Text(text = scannedData ?: "")
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            scannedData = null
-                        }
-                    ) {
-                        Text("Aceptar")
-                    }
+                LottieAnimation(
+                    composition = composition,
+                    progress = { animationState.progress },  // Cambio realizado
+                    modifier = Modifier.size(200.dp)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Escanea con IR la entrada del asistente",
+                    color = Color.White,
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Animated button
+                val infiniteTransition = rememberInfiniteTransition(label = "ButtonScale")  // Añadido label
+                val scale by infiniteTransition.animateFloat(
+                    initialValue = 1f,
+                    targetValue = if (isScanning) 1.2f else 1f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(1000, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "ScaleAnimation"  // Añadido label
+                )
+
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .scale(scale)
+                        .clip(CircleShape)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(Color(0xFFD90F96), Color(0xFF5503AE))
+                            )
+                        )
+                        .clickable(enabled = isDecoderInitialized) {
+                            if (isScanning) {
+                                barcodeDecoder?.stopScan()
+                                isScanning = false
+                            } else {
+                                barcodeDecoder?.startScan()
+                                isScanning = true
+                            }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "IR",
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
-            )
+            }
+
+            if (scannedData != null) {
+                AlertDialog(
+                    onDismissRequest = {
+                        scannedData = null
+                        isScanning = false
+                    },
+                    title = {
+                        Text(text = "Datos Escaneados")
+                    },
+                    text = {
+                        Text(text = scannedData ?: "")
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                scannedData = null
+                                isScanning = false
+                            }
+                        ) {
+                            Text("Aceptar")
+                        }
+                    }
+                )
+            }
         }
     }
 }
