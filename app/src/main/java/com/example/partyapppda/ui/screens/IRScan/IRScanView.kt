@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -24,7 +25,6 @@ import com.rscja.deviceapi.entity.BarcodeEntity
 import android.app.Activity
 import android.util.Log
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.draw.clip
 import com.example.partyapppda.R
 
 @Composable
@@ -98,8 +98,8 @@ fun IRScanView(navController: NavController) {
 
                 LottieAnimation(
                     composition = composition,
-                    progress = { animationState.progress },  // Cambio realizado
-                    modifier = Modifier.size(200.dp)
+                    progress = { animationState.progress },
+                    modifier = Modifier.size(280.dp)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -113,45 +113,41 @@ fun IRScanView(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Animated button
-                val infiniteTransition = rememberInfiniteTransition(label = "ButtonScale")  // Añadido label
-                val scale by infiniteTransition.animateFloat(
-                    initialValue = 1f,
-                    targetValue = if (isScanning) 1.2f else 1f,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(1000, easing = LinearEasing),
-                        repeatMode = RepeatMode.Reverse
-                    ),
-                    label = "ScaleAnimation"  // Añadido label
-                )
-
+                // Animated button with breathing effect
                 Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .scale(scale)
-                        .clip(CircleShape)
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(Color(0xFFD90F96), Color(0xFF5503AE))
-                            )
-                        )
-                        .clickable(enabled = isDecoderInitialized) {
-                            if (isScanning) {
-                                barcodeDecoder?.stopScan()
-                                isScanning = false
-                            } else {
-                                barcodeDecoder?.startScan()
-                                isScanning = true
-                            }
-                        },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "IR",
-                        color = Color.White,
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
-                    )
+                    // Background circles
+                    BreathingCircles(isScanning)
+
+                    // Main button
+                    Box(
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(CircleShape)
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(Color(0xFFD90F96), Color(0xFF5503AE))
+                                )
+                            )
+                            .clickable(enabled = isDecoderInitialized) {
+                                if (isScanning) {
+                                    barcodeDecoder?.stopScan()
+                                    isScanning = false
+                                } else {
+                                    barcodeDecoder?.startScan()
+                                    isScanning = true
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "IR",
+                            color = Color.White,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
 
@@ -179,6 +175,107 @@ fun IRScanView(navController: NavController) {
                     }
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun BreathingCircles(isScanning: Boolean) {
+    if (isScanning) {
+        val infiniteTransition = rememberInfiniteTransition()
+
+        val scale1 by infiniteTransition.animateFloat(
+            initialValue = 1f,
+            targetValue = 3f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 3000, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart
+            )
+        )
+
+        val alpha1 by infiniteTransition.animateFloat(
+            initialValue = 0.5f,
+            targetValue = 0f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 3000, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart
+            )
+        )
+
+        val scale2 by infiniteTransition.animateFloat(
+            initialValue = 1f,
+            targetValue = 3f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 4000, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart,
+                initialStartOffset = StartOffset(1000)
+            )
+        )
+
+        val alpha2 by infiniteTransition.animateFloat(
+            initialValue = 0.5f,
+            targetValue = 0f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 4000, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart,
+                initialStartOffset = StartOffset(1000)
+            )
+        )
+
+        val scale3 by infiniteTransition.animateFloat(
+            initialValue = 1f,
+            targetValue = 3f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 5000, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart,
+                initialStartOffset = StartOffset(2000)
+            )
+        )
+
+        val alpha3 by infiniteTransition.animateFloat(
+            initialValue = 0.5f,
+            targetValue = 0f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 5000, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart,
+                initialStartOffset = StartOffset(2000)
+            )
+        )
+
+        Box(
+            modifier = Modifier.size(200.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            // Circle 1
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .scale(scale1)
+                    .clip(CircleShape)
+                    .background(
+                        Color(0xFFD90F96).copy(alpha = alpha1)
+                    )
+            )
+            // Circle 2
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .scale(scale2)
+                    .clip(CircleShape)
+                    .background(
+                        Color(0xFFD90F96).copy(alpha = alpha2)
+                    )
+            )
+            // Circle 3
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .scale(scale3)
+                    .clip(CircleShape)
+                    .background(
+                        Color(0xFFD90F96).copy(alpha = alpha3)
+                    )
+            )
         }
     }
 }
